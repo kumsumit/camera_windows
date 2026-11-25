@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors
+// Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -467,15 +467,10 @@ HRESULT CaptureControllerImpl::FindBaseMediaTypes() {
     return hr;
   }
 
-  return FindBaseMediaTypesForSource(source.Get());
-}
-
-HRESULT CaptureControllerImpl::FindBaseMediaTypesForSource(
-    IMFCaptureSource* source) {
   // Find base media type for previewing.
   if (!FindBestMediaType(
           (DWORD)MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
-          source, base_preview_media_type_.GetAddressOf(),
+          source.Get(), base_preview_media_type_.GetAddressOf(),
           GetMaxPreviewHeight(), &preview_frame_width_,
           &preview_frame_height_)) {
     return E_FAIL;
@@ -484,8 +479,8 @@ HRESULT CaptureControllerImpl::FindBaseMediaTypesForSource(
   // Find base media type for record and photo capture.
   if (!FindBestMediaType(
           (DWORD)MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
-          source, base_capture_media_type_.GetAddressOf(), 0xffffffff, nullptr,
-          nullptr)) {
+          source.Get(), base_capture_media_type_.GetAddressOf(), 0xffffffff,
+          nullptr, nullptr)) {
     return E_FAIL;
   }
 
@@ -571,28 +566,13 @@ void CaptureControllerImpl::StartPreview() {
 
   HRESULT hr = S_OK;
 
-  ComPtr<IMFCaptureSource> source;
-  hr = capture_engine_->GetSource(&source);
-  if (FAILED(hr)) {
-    return OnPreviewStarted(GetCameraResult(hr),
-                            "Failed to get capture engine source");
-  }
-
   if (!base_preview_media_type_) {
     // Enumerates mediatypes and finds media type for video capture.
-    hr = FindBaseMediaTypesForSource(source.Get());
+    hr = FindBaseMediaTypes();
     if (FAILED(hr)) {
       return OnPreviewStarted(GetCameraResult(hr),
                               "Failed to initialize video preview");
     }
-  }
-
-  hr = source->SetCurrentDeviceMediaType(
-      (DWORD)MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
-      base_preview_media_type_.Get());
-  if (FAILED(hr)) {
-    return OnPreviewStarted(GetCameraResult(hr),
-                            "Failed to set video preview output format");
   }
 
   texture_handler_->UpdateTextureSize(preview_frame_width_,
