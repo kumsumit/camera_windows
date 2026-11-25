@@ -165,7 +165,6 @@ class MockCameraApi extends _i1.Mock implements _i2.CameraApi {
         )),
       ) as _i4.Future<String>);
 
-  @override
   _i4.Future<void> startImageStream(int? cameraId) => (super.noSuchMethod(
         Invocation.method(
           #startImageStream,
@@ -175,7 +174,6 @@ class MockCameraApi extends _i1.Mock implements _i2.CameraApi {
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
 
-  @override
   _i4.Future<void> stopImageStream(int? cameraId) => (super.noSuchMethod(
         Invocation.method(
           #stopImageStream,
